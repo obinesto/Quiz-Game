@@ -1,1 +1,1 @@
-# A simple quiz-game model
+# A simple quiz-game model built with javascript
