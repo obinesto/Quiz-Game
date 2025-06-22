@@ -59,7 +59,8 @@ label {
 }
 
 li:hover {
-  background-color: red;
+  background-color: lightgray;
+  color: #000;
   cursor: pointer;
 }
 
