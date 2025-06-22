@@ -1,134 +1,202 @@
-var questionBank = [
-{
-    question: 'Which club is the highest all-time UEFA champions league winner',
-    option: ['Arsenal FC','FC Porto','Real Madrid FC','FC Bayern Munich'],
-    answer: 'Real Madrid FC'
-},
-{
-    question: 'Who is the current sitting President of Nigeria',
-    option: ['David Mark','Peter Obi','Bola Tinubu','Aliko Dangote'],
-    answer: 'Bola Tinubu'
-},
+import QuestionBank from "./Questions.js"
 
-{
-    question: 'What is the capital of Germany',
-    option: ['Bayern','Berlin','Hesse','Hamburg'],
-    answer: 'Berlin'
-},
-{
-    question: 'Which mountain is the highest in the world',
-    option: ['k2','Kilimanjaro','Everest','Makalu'],
-    answer: 'Everest'
-}
-]
-// console.log (questionBank)
-// console.log (questionBank.length)
+const questions = QuestionBank()
 
-var question = document.getElementById('question')
-var opt = document.getElementById('opt')
-var option0 = document.getElementById('option0')
-var option1 = document.getElementById('option1')
-var option2 = document.getElementById('option2')
-var option3 = document.getElementById('option3')
-var btnii = document.getElementById('btn2')
-var btniii = document.getElementById('btn3')
-var stat = document.querySelector('.stat')
-var quiz = document.querySelector('.quiz-container')
+var quizContainer = document.querySelector('.quiz-container')
 var scoreBoard = document.querySelector('#scoreboard')
 var AnwserBoard = document.querySelector('#AnwserBoard')
-var i = 0
-var timer = document.getElementById('timer')
-var scoreInit = 0
 var scores = document.querySelector('.score')
 var olRenderAnwsers = document.getElementById('renderAnwsers')
+let quizOptions = document.getElementById('options')
+let i = 0
+let scoreInit = 0
+let filteredQuestions = []
 
 
-function clock(){
-    var date = new Date()
-    var hours = date.getHours()
-    var minute = date.getMinutes()
-    var sec = date.getSeconds()
-    timer.innerHTML = `${hours} : ${minute} : ${sec}`
-    timer.style.color ='yellow'
-    if(hours >= 12){
-        timer.style.color = 'red'
+// Timer
+let timerInterval = null;
+const timerDisplay = "05:00";
+const timerDisplay2 = "00:00";
+let quizTimer = document.getElementById('timer');
+quizTimer.innerHTML = `<p style="color:white;">Timer</p>${timerDisplay}`
+quizTimer.style.color = 'yellow';
+function setTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+    }
+    
+    let seconds = 300;    
+    timerInterval = setInterval(() => {
+        seconds--;
+        
+        if (seconds === 0) {
+            i = filteredQuestions.length
+            nextQuestion()
+            clearInterval(timerInterval);
+            timerInterval = null;
+            quizTimer.innerHTML = `<p style="color:white;">Timer</p>${timerDisplay2}`
+            return;
+        }
+        
+        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        quizTimer.innerHTML = `<p style="color:white;">Timer</p>${mins}:${secs}`;
+    }, 1000);
+}
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        quizTimer.innerHTML = `<p style="color:white;">Timer</p>${timerDisplay2}`
     }
 }
-clock()
-setInterval(clock,1000)
 
-function displayQuestion(){
-option0.innerHTML = questionBank[i].option[0]
-option1.innerHTML = questionBank[i].option[1]
-option2.innerHTML = questionBank[i].option[2]
-option3.innerHTML = questionBank[i].option[3]
-question.innerHTML = questionBank[i].question
-stat.innerHTML =`Question ${i+1} of ${questionBank.length}`
+function setCategory() {
+    const selectElement = document.querySelector(".selectCategory")
+    selectElement.innerHTML = '<option value="">Select a category</option>'
+    const categoryData = [...new Set(questions.map(item => item.category))]
+    // console.log("categoryData", categoryData)
+    categoryData.forEach(category => {
+        let optionElement = document.createElement("option")
+        optionElement.label = category
+        optionElement.value = category
+        selectElement.append(optionElement)
+    })
 }
-displayQuestion()
+setCategory()
 
-function nextQuestion(){
-if(i < questionBank.length -1)
-    {
-        i++
+function selectCategory() {
+    const selectValue = document.querySelector(".selectCategory").value
+    filteredQuestions = questions
+    .filter(item => item.category === selectValue)
+    .map(q => ({...q, selectedOption: null}))
+    // console.log("filteredQuestions", filteredQuestions)
+}
+window.selectCategory = selectCategory
+
+
+function startQuiz() {
+    if (filteredQuestions.length === 0) {
+        alert("kindly select a category")
+        return
+    }
+    document.querySelector(".select-container").style.display = "none"
+    document.querySelector(".case").style.display = "flex"
     displayQuestion()
-
-    var options = document.querySelectorAll('.option')
-        options.forEach( (option) =>{
-            option.style.background = ""
-        })
+    setTimer()
 }
-else{
-    scoreBoard.style.display = 'block';
-    
-    scores.innerHTML = `Your score is ${scoreInit} out of ${questionBank.length}`
-    scores.style.color = 'yellow'
+window.startQuiz = startQuiz
 
-    document.querySelector('.quiz-container').style.display = 'none'
-}
+function displayQuestion() {
+    if (filteredQuestions.length === 0) {
+        return
+    }
+    let quizQuestion = document.getElementById('question')
+    quizQuestion.innerText = `${filteredQuestions[i].question}`
+
+    let quizStat = document.querySelector('.stat')
+    quizStat.innerHTML = `Question ${i + 1} of ${filteredQuestions.length}`
+
+    quizOptions.innerHTML = ""
+
+    let optionsArray = filteredQuestions[i].options
+    optionsArray.map(item => {
+        let listElement = document.createElement("li")
+        listElement.className = "option"
+        listElement.innerHTML = item
+        quizOptions.appendChild(listElement)
+        // console.log("quizOptions:", quizOptions)
+
+        if (filteredQuestions[i].anwsered){
+            listElement.style.pointerEvents = "none"
+             if (item === filteredQuestions[i].answer){
+                listElement.style.background = "green"
+            } else if (item === filteredQuestions[i].selectedOption){
+                listElement.style.background = "red"
+            } else{
+                listElement.style.opacity = "0.7"
+            }
+        }
+    })
+    handleClickedOption()
 }
 
-function prevQuestion(){
-if(i > 0)
-    {
-        i--
+function nextQuestion() {
+    if (i < filteredQuestions.length - 1) {
+        i++
         displayQuestion()
     }
+    else {
+        stopTimer()
+        document.querySelector('.quiz-container').style.display = 'none'
+        scoreBoard.style.display = 'block';
+        scores.innerHTML = `Your score is ${scoreInit} out of ${filteredQuestions.length}`
+        scores.style.color = 'yellow'
+    }
 }
+window.nextQuestion = nextQuestion;
 
-btnii.addEventListener('click',nextQuestion);
-btniii.addEventListener('click',prevQuestion)
+function prevQuestion() {
+    if (i > 0) {
+        i--;
+        displayQuestion();
+    } else {
+        return;
+    }
+}
+window.prevQuestion = prevQuestion;
 
+function calculateScore(event) {
+    const clickedOption = event.target
+    const currentQuestion = filteredQuestions[i]
 
-function calculateScore(clickedAnswer){
-    
-    if (clickedAnswer.innerHTML === questionBank[i].answer){
-        scoreInit = scoreInit + 1
-         
-        document.getElementById(clickedAnswer.id).style.background='#5eef5e'
-    } 
-    else{
-        document.getElementById(clickedAnswer.id).style.background = "burlywood"
+    if (!currentQuestion.anwsered) {
+        if (clickedOption.textContent === currentQuestion.answer) {
+            scoreInit = scoreInit + 1  
+            clickedOption.style.background = 'green'
+        } else {
+            clickedOption.style.background = 'red'
+            Array.from(quizOptions.children).forEach(option =>{
+                if (option.textContent === currentQuestion.answer){
+                    option.style.background = "green"
+                }
+            })
+        }
+        currentQuestion.anwsered = true
+        currentQuestion.selectedOption = clickedOption.textContent
+        Array.from(quizOptions.children).forEach(option => {
+            option.style.pointerEvents = "none"
+        })
     }
 }
 
+async function handleClickedOption() {
+    const options = await document.querySelectorAll(".option")
+    // console.log(options)
+    options.forEach(option =>{
+        option.removeEventListener("click", calculateScore)
+        option.addEventListener("click", calculateScore)
+    })
+}
 
-function BackToQuiz() {
+function checkAnswer() {
+
+    scoreBoard.style.display = 'none'
+    AnwserBoard.style.display = 'block'
+
+    olRenderAnwsers.innerHTML = ''
+
+    for (let num = 0; num < filteredQuestions.length; num++) {
+        const Anwser = document.createElement('li')
+        Anwser.innerHTML = filteredQuestions[num].answer
+        olRenderAnwsers.appendChild(Anwser)
+    }
+}
+window.checkAnswer = checkAnswer
+
+
+function backToQuiz() {
     window.location.reload()
 }
-
-
-
-function CheckAnswer(){
-
-scoreBoard.style.display = 'none'
-AnwserBoard.style.display = 'block'
-
-olRenderAnwsers.innerHTML= ''
-
-for (num = 0; num < questionBank.length; num++){
-    const Anwser = document.createElement('li')
-    Anwser.innerHTML = questionBank[num].answer
-    olRenderAnwsers.appendChild(Anwser)
-}
-}
+window.backToQuiz = backToQuiz
