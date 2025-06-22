@@ -1,2 +1,1 @@
-# A simple quiz-game model
-link: https://obinesto.github.io/Quiz-Game/
+# A simple quiz-game model built with javascript
