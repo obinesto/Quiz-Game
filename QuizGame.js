@@ -18,7 +18,7 @@ let timerInterval = null;
 const timerDisplay = "05:00";
 const timerDisplay2 = "00:00";
 let quizTimer = document.getElementById('timer');
-quizTimer.innerHTML = `<p style="color:white;">Timer</p>${timerDisplay}`
+quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:white"></i>${timerDisplay}`
 quizTimer.style.color = 'yellow';
 function setTimer() {
     if (timerInterval) {
@@ -34,13 +34,13 @@ function setTimer() {
             nextQuestion()
             clearInterval(timerInterval);
             timerInterval = null;
-            quizTimer.innerHTML = `<p style="color:white;">Timer</p>${timerDisplay2}`
+            quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch"></i>${timerDisplay2}`
             return;
         }
         
         const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
         const secs = (seconds % 60).toString().padStart(2, '0');
-        quizTimer.innerHTML = `<p style="color:white;">Timer</p>${mins}:${secs}`;
+        quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch"></i>${mins}:${secs}`;
     }, 1000);
 }
 
@@ -48,7 +48,7 @@ function stopTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
-        quizTimer.innerHTML = `<p style="color:white;">Timer</p>${timerDisplay2}`
+        quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch"></i>${timerDisplay2}`
     }
 }
 
