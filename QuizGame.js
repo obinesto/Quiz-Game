@@ -9,13 +9,12 @@ var scores = document.querySelector('.score')
 var olRenderAnwsers = document.getElementById('renderAnwsers')
 let quizOptions = document.getElementById('options')
 let i = 0
-let scoreInit = 0
 let filteredQuestions = []
 
 
 // Timer
 let timerInterval = null;
-const timerDisplay = "05:00";
+const timerDisplay = "03:00";
 const timerDisplay2 = "00:00";
 let quizTimer = document.getElementById('timer');
 quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:white"></i>${timerDisplay}`
@@ -25,7 +24,7 @@ function setTimer() {
         clearInterval(timerInterval);
     }
     
-    let seconds = 300;    
+    let seconds = 180;    
     timerInterval = setInterval(() => {
         seconds--;
         
@@ -70,7 +69,7 @@ function selectCategory() {
     const selectValue = document.querySelector(".selectCategory").value
     filteredQuestions = questions
     .filter(item => item.category === selectValue)
-    .map(q => ({...q, selectedOption: null}))
+    .map(q => ({...q, selectedOption: null, answered: false}))
     // console.log("filteredQuestions", filteredQuestions)
 }
 window.selectCategory = selectCategory
@@ -119,7 +118,7 @@ function displayQuestion() {
             }
         }
     })
-    handleClickedOption()
+    setupOptionClickHandlers()
 }
 
 function nextQuestion() {
@@ -131,7 +130,7 @@ function nextQuestion() {
         stopTimer()
         document.querySelector('.quiz-container').style.display = 'none'
         scoreBoard.style.display = 'block';
-        scores.innerHTML = `Your score is ${scoreInit} out of ${filteredQuestions.length}`
+        scores.innerHTML = `Your score is ${calculateScore()} out of ${filteredQuestions.length}`
         scores.style.color = 'yellow'
     }
 }
@@ -147,23 +146,22 @@ function prevQuestion() {
 }
 window.prevQuestion = prevQuestion;
 
-function calculateScore(event) {
+function handleOptionSelection(event) {
     const clickedOption = event.target
     const currentQuestion = filteredQuestions[i]
 
-    if (!currentQuestion.anwsered) {
+    if (!currentQuestion.answered) {
         if (clickedOption.textContent === currentQuestion.answer) {
-            scoreInit = scoreInit + 1  
             clickedOption.style.background = 'green'
         } else {
             clickedOption.style.background = 'red'
-            Array.from(quizOptions.children).forEach(option =>{
-                if (option.textContent === currentQuestion.answer){
+            Array.from(quizOptions.children).forEach(option => {
+                if (option.textContent === currentQuestion.answer) {
                     option.style.background = "green"
                 }
             })
         }
-        currentQuestion.anwsered = true
+        currentQuestion.answered = true
         currentQuestion.selectedOption = clickedOption.textContent
         Array.from(quizOptions.children).forEach(option => {
             option.style.pointerEvents = "none"
@@ -171,16 +169,20 @@ function calculateScore(event) {
     }
 }
 
-async function handleClickedOption() {
+async function setupOptionClickHandlers() {
     const options = await document.querySelectorAll(".option")
-    // console.log(options)
-    options.forEach(option =>{
-        option.removeEventListener("click", calculateScore)
-        option.addEventListener("click", calculateScore)
+    options.forEach(option => {
+        option.removeEventListener("click", handleOptionSelection)
+        option.addEventListener("click", handleOptionSelection)
     })
 }
 
-function checkAnswer() {
+function calculateScore(){
+    const score = filteredQuestions.filter(q => q.answer === q.selectedOption)
+    return score.length
+}
+
+function checkAnswers() {
 
     scoreBoard.style.display = 'none'
     AnwserBoard.style.display = 'block'
@@ -193,7 +195,7 @@ function checkAnswer() {
         olRenderAnwsers.appendChild(Anwser)
     }
 }
-window.checkAnswer = checkAnswer
+window.checkAnswers = checkAnswers
 
 
 function backToQuiz() {
