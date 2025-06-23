@@ -34,13 +34,13 @@ function setTimer() {
             nextQuestion()
             clearInterval(timerInterval);
             timerInterval = null;
-            quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch"></i>${timerDisplay2}`
+            quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:white"></i>${timerDisplay2}`
             return;
         }
         
         const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
         const secs = (seconds % 60).toString().padStart(2, '0');
-        quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch"></i>${mins}:${secs}`;
+        quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:white"></i>${mins}:${secs}`;
     }, 1000);
 }
 
@@ -48,7 +48,7 @@ function stopTimer() {
     if (timerInterval) {
         clearInterval(timerInterval);
         timerInterval = null;
-        quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch"></i>${timerDisplay2}`
+        quizTimer.innerHTML = `<i class="fa-solid fa-stopwatch" style="color:white"></i>${timerDisplay2}`
     }
 }
 
